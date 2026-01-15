@@ -1,0 +1,7 @@
+{
+  "name": "video-downloader-api",
+  "type": "module",
+  "dependencies": {
+    "axios": "^1.6.0"
+  }
+}
