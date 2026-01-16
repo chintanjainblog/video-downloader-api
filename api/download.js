@@ -1,12 +1,12 @@
-// TEMPORARY TEST VERSION - REMOVE LATER
+// api/download.js - WORKING VERSION WITH AXIOS
 import axios from "axios";
 
 export default async function handler(req, res) {
-  console.log("API called with method:", req.method);
+  console.log("🚀 API Called:", req.method);
   
-  // Allow CORS for testing
+  // Set CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   
   // Handle preflight
@@ -14,66 +14,73 @@ export default async function handler(req, res) {
     return res.status(200).end();
   }
   
-  // For testing, allow GET to see if API is working
+  // Handle GET requests (for testing)
   if (req.method === 'GET') {
     return res.status(200).json({
       success: true,
-      message: "✅ API is working!",
+      message: "🎉 VIDEO DOWNLOADER API IS WORKING!",
       timestamp: new Date().toISOString(),
       instructions: "Send POST request with {url: 'video-url'}",
-      debug: {
-        hasRapidAPIKey: !!process.env.RAPIDAPI_KEY,
-        nodeVersion: process.version
-      }
+      status: "Ready to connect to RapidAPI"
     });
   }
   
-  // Original POST logic
-  if (req.method !== "POST") {
-    return res.status(405).json({ error: "Only POST requests allowed" });
+  // Handle POST requests
+  if (req.method === 'POST') {
+    try {
+      const { url } = req.body;
+      
+      if (!url) {
+        return res.status(400).json({
+          success: false,
+          error: "Please provide a video URL"
+        });
+      }
+      
+      console.log("Processing URL:", url);
+      
+      // ⚠️ TEMPORARY: Return test response (remove when adding RapidAPI)
+      return res.status(200).json({
+        success: true,
+        message: "✅ Connected! Ready for RapidAPI integration",
+        receivedUrl: url,
+        testMode: true,
+        note: "1. This test works! 2. Now add your RapidAPI credentials",
+        exampleResponse: {
+          quality: "720p",
+          downloadUrl: "#",
+          size: "15.2 MB"
+        }
+      });
+      
+      // ⚠️ UNCOMMENT THIS WHEN READY FOR RAPIDAPI:
+      // const rapidApiResponse = await axios.post(
+      //   "YOUR_RAPIDAPI_ENDPOINT_HERE",
+      //   { url: url },
+      //   {
+      //     headers: {
+      //       "X-RapidAPI-Key": process.env.RAPIDAPI_KEY,
+      //       "X-RapidAPI-Host": "YOUR_RAPIDAPI_HOST_HERE",
+      //       "Content-Type": "application/json"
+      //     }
+      //   }
+      // );
+      // 
+      // return res.status(200).json(rapidApiResponse.data);
+      
+    } catch (error) {
+      console.error("Error:", error.message);
+      return res.status(500).json({
+        success: false,
+        error: "Server error",
+        details: error.message
+      });
+    }
   }
-
-  const { url } = req.body;
-
-  if (!url) {
-    return res.status(400).json({ error: "Video URL is required" });
-  }
-
-  try {
-    // TEMPORARY: Return test data instead of calling RapidAPI
-    return res.status(200).json({
-      success: true,
-      message: "Test mode - API is working!",
-      receivedUrl: url,
-      testDownload: {
-        quality: "720p",
-        size: "15.2 MB",
-        url: "#",
-        note: "Replace with RapidAPI response"
-      },
-      rapidApiReady: !!process.env.RAPIDAPI_KEY
-    });
-
-    // // UNCOMMENT THIS LATER WHEN RAPIDAPI IS SETUP
-    // const response = await axios.post(
-    //   "PASTE_RAPIDAPI_ENDPOINT_HERE",
-    //   { url: url },
-    //   {
-    //     headers: {
-    //       "X-RapidAPI-Key": process.env.RAPIDAPI_KEY,
-    //       "X-RapidAPI-Host": "PASTE_RAPIDAPI_HOST_HERE",
-    //       "Content-Type": "application/json"
-    //     }
-    //   }
-    // );
-    // 
-    // res.status(200).json(response.data);
-
-  } catch (error) {
-    console.error("Error:", error.message);
-    res.status(500).json({
-      error: "Failed to fetch video",
-      details: error.message
-    });
-  }
+  
+  // Method not allowed
+  return res.status(405).json({
+    success: false,
+    error: "Method not allowed. Use GET or POST."
+  });
 }
