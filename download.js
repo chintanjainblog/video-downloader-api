@@ -2,35 +2,36 @@ import axios from "axios";
 
 export default async function handler(req, res) {
 
-  // Allow only POST requests
+  // Step 1: Allow only POST requests
   if (req.method !== "POST") {
-    res.status(405).json({ error: "Only POST requests allowed" });
-    return;
+    return res.status(405).json({ error: "Only POST requests allowed" });
   }
 
-  // Get the video URL sent from Blogger
+  // Step 2: Read video URL sent from Blogger
   const { url } = req.body;
 
-  // Validate input
+  // Step 3: Validate input
   if (!url) {
-    res.status(400).json({ error: "Video URL is required" });
-    return;
+    return res.status(400).json({ error: "Video URL is required" });
   }
 
   try {
-    // Call RapidAPI securely
-    const response = await axios.get(
-      "https://EXAMPLE-RAPIDAPI-ENDPOINT",
+    // Step 4: Call RapidAPI securely
+    const response = await axios.post(
+      "video-downloader-api-uzoj-m4imnha3v.vercel.app",
       {
-        params: { url },
+        url: url
+      },
+      {
         headers: {
           "X-RapidAPI-Key": process.env.RAPIDAPI_KEY,
-          "X-RapidAPI-Host": "EXAMPLE-RAPIDAPI-HOST"
+          "X-RapidAPI-Host": "social-download-all-in-one.p.rapidapi.com",
+          "Content-Type": "application/json"
         }
       }
     );
 
-    // Send response back to Blogger
+    // Step 5: Send RapidAPI response back to frontend
     res.status(200).json(response.data);
 
   } catch (error) {
